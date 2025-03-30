@@ -4,7 +4,6 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
-// use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
@@ -16,21 +15,8 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $notStarted = Task::where('status', 'Not Started')->get();
-        $inProgress = Task::where('status', 'In Progress')->get();
-        $done = Task::where('status', 'Done')->get();
-        $archived = Task::where('status', 'Archived')->get();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'all tasks data',
-            'data' => [
-                'notStarted' => $notStarted,
-                'inProgress' => $inProgress,
-                'done' => $done,
-                'archived' => $archived,
-            ],
-        ], 200);
+        $tasks = Task::orderBy('created_at', 'desc')->get();
+        return response()->json(['success' => true, 'message' => 'All tasks data', 'tasks' => $tasks], 200);
     }
 
     public function create()
@@ -81,7 +67,7 @@ class TaskController extends Controller
         $task = Task::find($id);
         if ($task) {
             $task->delete();
-            return response()->json(['success' => true, 'message' => 'task deleted successfully'], 200);
+            return response()->json(['success' => true, 'message' => 'Task deleted successfully'], 200);
         }
         return response()->json(['error' => true, 'message' => 'Task not found'], 404);
     }

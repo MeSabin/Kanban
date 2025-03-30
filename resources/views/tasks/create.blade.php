@@ -19,7 +19,7 @@
             </div>
         @endif
 
-        <form action="{{ route('tasks.store') }}" method="POST">
+        <form action="{{ route('task.store') }}" method="POST">
             @csrf
             <label class="block text-gray-600 font-medium mb-1">Title:</label>
             <input type="text" name="title" value="{{ old('title') }}" class="w-full border px-3 py-2 rounded">
