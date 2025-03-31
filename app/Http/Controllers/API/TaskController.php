@@ -15,7 +15,7 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = Task::orderBy('created_at', 'desc')->get();
+        $tasks = Task::all();
         return response()->json(['success' => true, 'message' => 'All tasks data', 'tasks' => $tasks], 200);
     }
 
@@ -68,6 +68,25 @@ class TaskController extends Controller
         if ($task) {
             $task->delete();
             return response()->json(['success' => true, 'message' => 'Task deleted successfully'], 200);
+        }
+        return response()->json(['error' => true, 'message' => 'Task not found'], 404);
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $validation = Validator::make($request->all(), [
+            'status' => 'required|in:Not Started,In Progress,Done,Archived',
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json(['error' => true, 'errors' => $validation->errors()], 422);
+        }
+
+        $task = Task::find($request->id);
+        if ($task) {
+            $task->status = $request->status;
+            $task->save();
+            return response()->json(['success' => true, 'message' => 'Task status updated successfully', 'task' => $task], 200);
         }
         return response()->json(['error' => true, 'message' => 'Task not found'], 404);
     }

@@ -11,8 +11,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/task', [TaskController::class, 'create'])->name('task.create');
 Route::get('/tasks', [TaskController::class, 'index'])->name('task.index');
 Route::post('/tasks', [TaskController::class, 'store'])->name('task.store');
-Route::get('/tasks/{id}', [TaskController::class, 'show'])->name('task.show');
-Route::put('/tasks/{id}', [TaskController::class, 'update'])->name('task.update');
+// Route::get('/tasks/{id}', [TaskController::class, 'show'])->name('task.show');
+// Route::put('/tasks/{id}', [TaskController::class, 'update'])->name('task.update');
+Route::post('/tasks/status-update/{id}', [TaskController::class, 'updateStatus'])->name('task.status-update');
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy'])->name('task.destroy');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 

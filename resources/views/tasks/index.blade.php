@@ -8,6 +8,7 @@
     <title>Sprint Board</title>
     @vite('resources/css/app.css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 </head>
 
 <body class="bg-indigo-50 h-screen border border-red-400">
@@ -17,7 +18,7 @@
 
 
         <div class="flex justify-center gap-8">
-            <div class="w-72 p-4 border border-gray-400 rounded-lg bg-gray-100" data-status="Not Started">
+            <div class="task-column w-72 p-4 border border-gray-400 rounded-lg bg-gray-100" data-status="Not Started">
                 <h2 class="text-sm font-semibold text-gray-600 mb-2 bg-gray-200 rounded-full px-2 inline-block">Not
                     Started</h2>
                 <div class="tasks-container mb-4 min-h-[50px]"></div>
@@ -30,7 +31,7 @@
                 </div>
             </div>
 
-            <div class="w-72 bg-blue-100 p-4 border border-blue-400 rounded-lg" data-status="In Progress">
+            <div class="task-column w-72 bg-blue-100 p-4 border border-blue-400 rounded-lg" data-status="In Progress">
                 <h2 class="text-sm font-semibold text-blue-600 mb-2 bg-blue-200 rounded-full px-2 inline-block">In
                     Progress</h2>
                 <div class="tasks-container mb-4 min-h-[50px]"></div>
@@ -43,7 +44,7 @@
                 </div>
             </div>
 
-            <div class="w-72 bg-green-100 p-4 rounded-lg border border-green-400" data-status="Done">
+            <div class="task-column w-72 bg-green-100 p-4 rounded-lg border border-green-400" data-status="Done">
                 <h2 class="text-sm font-semibold text-green-600 mb-2 bg-green-200 rounded-full px-2 inline-block">Done
                 </h2>
                 <div class="tasks-container mb-4 min-h-[50px]"></div>
@@ -56,7 +57,7 @@
                 </div>
             </div>
 
-            <div class="w-72 bg-gray-100 p-4 rounded-lg border border-gray-400" data-status="Archived">
+            <div class="task-column w-72 bg-gray-100 p-4 rounded-lg border border-gray-400" data-status="Archived">
                 <h2 class="text-sm font-semibold text-gray-600 mb-2 bg-gray-200 rounded-full px-2 inline-block">Archived
                 </h2>
                 <div class="tasks-container mb-4 min-h-[50px]"></div>
@@ -78,46 +79,76 @@
                 .then(data => {
                     if (data.success) {
                         let tasks = data.tasks;
-
                         tasks.forEach(task => {
                             let container = document.querySelector(
                                 `[data-status="${task.status}"] .tasks-container`);
                             if (container) {
                                 let taskDiv = document.createElement('div');
                                 taskDiv.className =
-                                    "p-3 border group border-gray-400 rounded mb-2 bg-gray-200 task-item";
+                                    "p-3 border border-gray-400 rounded mb-2 bg-gray-200 task-item cursor-move";
+                                taskDiv.setAttribute("data-id", task.id);
                                 taskDiv.innerHTML = `
-                            <div class="mb-2">
-                                <p class="font-semibold text-gray-600">${task.title}</p>
-                                <p class="text-gray-600 text-sm">${task.description || ''}</p>
-                            </div>
-                            <div class="flex justify-between items-center mt-4">
-                                <span class="rounded text-white px-2 bg-gray-400">
-                                    ${task.priority}
-                                </span>
-                                <i class="fa-solid group-hover:visible invisible delete-btn text-red-500 fa-trash cursor-pointer" title="delete"></i>
-                                </div>
-                        `;
-                                let deleteBtn = taskDiv.querySelector('.delete-btn');
-                                let dl
-                                deleteBtn.addEventListener('click', function() {
-                                    fetch(`/api/tasks/${task.id}`, {
-                                            method: 'DELETE'
-                                        })
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            if (data.success) {
-                                                taskDiv.remove();
-                                            }
-                                        })
-                                        .catch(error => console.error('Error',
-                                            error));
-                                });
+                                    <div class="mb-2">
+                                        <p class="font-semibold text-gray-600">${task.id}</p>
+                                        <p class="font-semibold text-gray-600">${task.title}</p>
+                                        <p class="text-gray-600 text-sm">${task.description || ''}</p>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-4">
+                                        <span class="rounded text-white px-2 bg-gray-400">
+                                            ${task.priority}
+                                        </span>
+                                        <i class="fa-solid delete-btn text-red-500 fa-trash cursor-pointer" title="Delete"></i>
+                                    </div>
+                                `;
+
+                                // Delete task
+                                taskDiv.querySelector('.delete-btn').addEventListener('click',
+                                    function() {
+                                        if (confirm("Do you really want to delete this task ?")) {
+                                            fetch(`/api/tasks/${task.id}`, {
+                                                    method: 'DELETE'
+                                                })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    if (data.success) {
+                                                        taskDiv.remove();
+                                                    }
+                                                })
+                                                .catch(error => console.error('Error', error));
+                                        }
+                                    });
+
                                 container.appendChild(taskDiv);
                             }
                         });
+
+                        // Sortable js for drag and drop
+                        document.querySelectorAll(".tasks-container").forEach(container => {
+                            new Sortable(container, {
+                                group: "tasks",
+                                animation: 150,
+                                onEnd: function(evt) {
+                                    let taskId = evt.item.getAttribute("data-id");
+                                    let newStatus = evt.to.closest(".task-column")
+                                        .getAttribute("data-status");
+
+                                    // update task status 
+                                    fetch(`/api/tasks/status-update/${taskId}`, {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json"
+                                        },
+                                        body: JSON.stringify({
+                                            status: newStatus
+                                        })
+                                    }).catch(error => console.error(
+                                        "Task status error:", error));
+                                }
+                            });
+                        });
                     }
-                }).catch(error => console.error("Error fetching tasks:", error));
+                })
+                .catch(error => console.error("Task error:", error));
         });
     </script>
 </body>

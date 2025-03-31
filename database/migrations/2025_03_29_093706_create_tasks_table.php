@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('title', 70)->unique();
             $table->text('description')->nullable();
-            // $table->string('position')->default(0);
             $table->enum('priority', ['Low', 'Medium', 'High'])->default('Medium');
             $table->enum('status', ['Not Started', 'In Progress', 'Done', 'Archived'])->default('Not Started');
             $table->timestamps();
