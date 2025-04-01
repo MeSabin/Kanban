@@ -15,7 +15,7 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = Task::all();
+        $tasks = Task::orderBy('position', 'asc')->get();
         return response()->json(['success' => true, 'message' => 'All tasks data', 'tasks' => $tasks], 200);
     }
 
@@ -35,11 +35,15 @@ class TaskController extends Controller
             'status' => 'nullable|in:Not Started,In Progress,Done,Archived',
         ]);
 
+        $data = $request->all();
+        $taskCount = Task::count() ?? 0;
+        $data['position'] = $taskCount + 1;
+
         if ($validation->fails()) {
             return response()->json(['error' => true, 'errors' => $validation->errors()], 422);
         }
 
-        $task = Task::create($request->all());
+        $task = Task::create($data);
         return response()->json(['success' => true, 'message' => 'Task created successfully', 'task' => $task], 201);
     }
 
@@ -72,22 +76,26 @@ class TaskController extends Controller
         return response()->json(['error' => true, 'message' => 'Task not found'], 404);
     }
 
-    public function updateStatus(Request $request)
+    public function updatePositions(Request $request)
     {
         $validation = Validator::make($request->all(), [
             'status' => 'required|in:Not Started,In Progress,Done,Archived',
+            'tasks' => 'required|array',
         ]);
 
         if ($validation->fails()) {
             return response()->json(['error' => true, 'errors' => $validation->errors()], 422);
         }
 
-        $task = Task::find($request->id);
-        if ($task) {
-            $task->status = $request->status;
-            $task->save();
-            return response()->json(['success' => true, 'message' => 'Task status updated successfully', 'task' => $task], 200);
+        foreach ($request->tasks as $taskData) {
+            $task = Task::find($taskData['id']);
+            if ($task) {
+                $task->status = $request->status;
+                $task->position = $taskData['position'];
+                $task->save();
+            }
         }
-        return response()->json(['error' => true, 'message' => 'Task not found'], 404);
+
+        return response()->json(['success' => true, 'message' => 'Task positions updated successfully']);
     }
 }
