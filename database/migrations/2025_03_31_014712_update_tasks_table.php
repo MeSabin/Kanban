@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->string('position')->default(0)->after('status');
+            $table->string('position')->default(0)->after('status'); // for task ordering
+            $table->softDeletes();  // for archived tasks
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('tasks', function (Blueprint $table) {
             $table->dropColumn('position');
+            $table->dropSoftDeletes();
         });
     }
 };

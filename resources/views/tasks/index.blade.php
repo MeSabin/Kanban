@@ -79,18 +79,17 @@
                                 taskDiv.setAttribute("data-position", task.position);
 
                                 taskDiv.innerHTML = `
-                                    <div class="mb-2">
-                                        <p class="font-semibold text-gray-600">${task.position}</p>
-                                        <p class="font-semibold text-gray-600">${task.title}</p>
-                                        <p class="text-gray-600 text-sm">${task.description || ''}</p>
-                                    </div>
-                                    <div class="flex justify-between items-center mt-4">
-                                        <span class="rounded text-white px-2 bg-gray-400">${task.priority}</span>
-                                        <i class="fa-solid delete-btn text-red-500 fa-trash cursor-pointer" title="Delete"></i>
-                                    </div>
-                                `;
+                            <div class="mb-2">
+                                <p class="font-semibold text-gray-600">${task.title}</p>
+                                <p class="text-gray-600 text-sm">${task.description || ''}</p>
+                            </div>
+                            <div class="flex justify-between items-center mt-4">
+                                <span class="rounded text-white px-2 bg-gray-400">${task.priority}</span>
+                                <i class="fa-solid delete-btn text-red-500 fa-trash cursor-pointer" title="Delete"></i>
+                            </div>
+                        `;
 
-                                // DELETE task
+                                // delete task
                                 taskDiv.querySelector('.delete-btn').addEventListener('click',
                                     function() {
                                         if (confirm("Do you really want to delete this task?")) {
@@ -112,7 +111,7 @@
                             }
                         });
 
-                        // Initialize Sortable.js for all columns
+                        // sortable js for all columns
                         document.querySelectorAll(".tasks-container").forEach(container => {
                             new Sortable(container, {
                                 group: "tasks",
@@ -125,7 +124,7 @@
                             });
                         });
 
-                        // Function to update positions and send API request
+                        // update task order(position within the column)
                         function updatePositions(container, newStatus = null) {
                             let tasks = [...container.children].map((task, index) => ({
                                 id: task.getAttribute("data-id"),

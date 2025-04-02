@@ -23,9 +23,7 @@ class TaskController extends Controller
     {
         return view('tasks.create');
     }
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
         $validation = Validator::make($request->all(), [
@@ -47,34 +45,6 @@ class TaskController extends Controller
         return response()->json(['success' => true, 'message' => 'Task created successfully', 'task' => $task], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        $task = Task::find($id);
-        if ($task) {
-            $task->delete();
-            return response()->json(['success' => true, 'message' => 'Task deleted successfully'], 200);
-        }
-        return response()->json(['error' => true, 'message' => 'Task not found'], 404);
-    }
 
     public function updatePositions(Request $request)
     {
@@ -97,5 +67,16 @@ class TaskController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => 'Task positions updated successfully']);
+    }
+
+
+    public function destroy(string $id)
+    {
+        $task = Task::find($id);
+        if ($task) {
+            $task->delete();
+            return response()->json(['success' => true, 'message' => 'Task deleted successfully'], 200);
+        }
+        return response()->json(['error' => true, 'message' => 'Task not found'], 404);
     }
 }
